@@ -6,8 +6,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 import AlphabeticNav from "@/components/AlphabeticNav";
 import Link from "next/link";
 
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
-
 export const dynamic = "error";
 export const dynamicParams = true;
 
@@ -16,35 +14,22 @@ async function getSubstances(letter: string): Promise<SubstanceNom[]> {
     .selectFrom("Subs_Nom")
     .selectAll("Subs_Nom")
     .where("NomLib", "like", `${letter.toLowerCase()}%`)
-    // filter the 500 list
-    .leftJoin("Composant", "Subs_Nom.NomId", "Composant.NomId")
-    .leftJoin("Specialite", "Composant.SpecId", "Specialite.SpecId")
-    .groupBy(["Subs_Nom.NomLib", "Subs_Nom.NomId", "Subs_Nom.SubsId"])
-    .where("Specialite.SpecId", "in", liste_CIS_MVP)
     .orderBy("Subs_Nom.NomLib")
     .execute();
 }
 
 async function getLetters() {
   return (
-    (
-      await pdbmMySQL
-        .selectFrom("Subs_Nom")
-        .select(({ fn, val }) =>
-          fn<string>("substr", ["Subs_Nom.NomLib", val(1), val(1)]).as(
-            "letter",
-          ),
-        )
+    await pdbmMySQL
+      .selectFrom("Subs_Nom")
+      .select(({ fn, val }) =>
+        fn<string>("substr", ["Subs_Nom.NomLib", val(1), val(1)]).as("letter"),
+      )
 
-        // Filter the 500 list
-        .leftJoin("Composant", "Subs_Nom.NomId", "Composant.NomId")
-        .leftJoin("Specialite", "Composant.SpecId", "Specialite.SpecId")
-        .where("Specialite.SpecId", "in", liste_CIS_MVP)
-        .orderBy("letter")
-        .groupBy("letter")
-        .execute()
-    ).map((r) => r.letter)
-  );
+      .orderBy("letter")
+      .groupBy("letter")
+      .execute()
+  ).map((r) => r.letter);
 }
 
 export default async function Page(props: {

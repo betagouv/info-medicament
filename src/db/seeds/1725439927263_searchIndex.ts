@@ -1,6 +1,5 @@
 import type { Kysely } from "kysely";
 import { pdbmMySQL } from "@/db/pdbmMySQL";
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
 import { getAtc } from "@/data/grist/atc";
 
 export async function seed(db: Kysely<any>): Promise<void> {
@@ -19,11 +18,6 @@ export async function seed(db: Kysely<any>): Promise<void> {
   const substances = await pdbmMySQL
     .selectFrom("Subs_Nom")
     .select(["Subs_Nom.NomLib", "Subs_Nom.NomId"])
-    // Filter the 500 list
-    .leftJoin("Composant", "Subs_Nom.NomId", "Composant.NomId")
-    .leftJoin("Specialite", "Composant.SpecId", "Specialite.SpecId")
-    .where("Specialite.SpecId", "in", liste_CIS_MVP)
-    .groupBy(["Subs_Nom.NomLib", "Subs_Nom.NomId"])
     .execute();
 
   await db.transaction().execute(async (db) => {
@@ -42,8 +36,6 @@ export async function seed(db: Kysely<any>): Promise<void> {
   const specialities = await pdbmMySQL
     .selectFrom("Specialite")
     .select(["SpecDenom01", "SpecId"])
-    // Filter the 500 list
-    .where("Specialite.SpecId", "in", liste_CIS_MVP)
     .execute();
 
   await db.transaction().execute(async (db) => {
@@ -62,11 +54,6 @@ export async function seed(db: Kysely<any>): Promise<void> {
   const pathologies = await pdbmMySQL
     .selectFrom("Patho")
     .select(["Patho.NomPatho", "Patho.codePatho"])
-    // Filter the 500
-    .leftJoin("Spec_Patho", "Patho.codePatho", "Spec_Patho.codePatho")
-    .leftJoin("Specialite", "Spec_Patho.SpecId", "Specialite.SpecId")
-    .where("Specialite.SpecId", "in", liste_CIS_MVP)
-    .groupBy(["Patho.NomPatho", "Patho.codePatho"])
     .execute();
 
   await db.transaction().execute(async (db) => {

@@ -1,5 +1,4 @@
 import { pdbmMySQL } from "@/db/pdbmMySQL";
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
 import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 import { fr } from "@codegouvfr/react-dsfr";
 import AlphabeticNav from "@/components/AlphabeticNav";
@@ -12,23 +11,18 @@ export const dynamicParams = true;
 
 async function getLetters() {
   return (
-    (
-      await pdbmMySQL
-        .selectFrom("GroupeGene")
-        .select(({ fn, val }) =>
-          fn<string>("substr", ["GroupeGene.LibLong", val(1), val(1)]).as(
-            "letter",
-          ),
-        )
+    await pdbmMySQL
+      .selectFrom("GroupeGene")
+      .select(({ fn, val }) =>
+        fn<string>("substr", ["GroupeGene.LibLong", val(1), val(1)]).as(
+          "letter",
+        ),
+      )
 
-        // Filter the 500 list
-        .leftJoin("Specialite", "GroupeGene.SpecId", "Specialite.SpecId")
-        .where("Specialite.SpecId", "in", liste_CIS_MVP)
-        .orderBy("letter")
-        .groupBy("letter")
-        .execute()
-    ).map((r) => r.letter)
-  );
+      .orderBy("letter")
+      .groupBy("letter")
+      .execute()
+  ).map((r) => r.letter);
 }
 
 export default async function Page(props: {
@@ -41,9 +35,6 @@ export default async function Page(props: {
     .selectFrom("GroupeGene")
     .select(["GroupeGene.LibLong", "GroupeGene.SpecId"])
     .where("GroupeGene.LibLong", "like", `${letter.toUpperCase()}%`)
-    // Filter the 500 list
-    .leftJoin("Specialite", "GroupeGene.SpecId", "Specialite.SpecGeneId")
-    .where("Specialite.SpecId", "in", liste_CIS_MVP)
     .groupBy(["GroupeGene.LibLong", "GroupeGene.SpecId"])
     .orderBy("GroupeGene.LibLong")
     .execute();

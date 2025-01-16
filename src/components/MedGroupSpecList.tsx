@@ -1,7 +1,8 @@
-import { getAtc2, getAtcCode } from "@/data/grist/atc";
+import { ATCError, getAtc2, getAtcCode } from "@/data/grist/atc";
 import { fr } from "@codegouvfr/react-dsfr";
 import {
   displaySimpleComposants,
+  errorFallback,
   formatSpecName,
   MedicamentGroup,
 } from "@/displayUtils";
@@ -19,9 +20,13 @@ export default async function MedGroupSpecList({
   className?: string;
 }) {
   const [groupName, specialites] = medGroup;
-  const atc = getAtcCode(specialites[0].SpecId);
+  const atc = errorFallback(
+    () => getAtcCode(specialites[0].SpecId),
+    ATCError,
+    null,
+  );
   const { composants } = await getSpecialite(specialites[0].SpecId);
-  const subClass = await getAtc2(atc);
+  const subClass = atc && (await getAtc2(atc));
   return (
     <li className={className}>
       <div>
@@ -35,15 +40,17 @@ export default async function MedGroupSpecList({
             <i className={cx("fr-icon--custom-pill", fr.cx("fr-icon--sm"))} />
           </div>
           <ul className={fr.cx("fr-tags-group", "fr-mb-n1v")}>
-            <Tag
-              small
-              linkProps={{
-                href: `/atc/${subClass.code}`,
-                className: cx("fr-tag--custom-alt-class"),
-              }}
-            >
-              {subClass.label}
-            </Tag>
+            {subClass && (
+              <Tag
+                small
+                linkProps={{
+                  href: `/atc/${subClass.code}`,
+                  className: cx("fr-tag--custom-alt-class"),
+                }}
+              >
+                {subClass.label}
+              </Tag>
+            )}
             <Tag
               small
               linkProps={{

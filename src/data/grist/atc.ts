@@ -6,7 +6,6 @@ import { parse as csvParse } from "csv-parse/sync";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { SubstanceNom } from "@/db/pdbmMySQL/types";
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
 import { pdbmMySQL } from "@/db/pdbmMySQL";
 
 export interface ATC1 extends ATC {
@@ -140,8 +139,7 @@ export const getSubstancesByAtc = async function (
   const CIS = (atc2.children as ATC[])
     .map((atc3) => atcData.filter((row) => row[1] === atc3.code))
     .map((rows) => rows.map((row) => row[0]))
-    .flat()
-    .filter((cis) => liste_CIS_MVP.includes(cis));
+    .flat();
 
   if (!CIS.length) return;
 

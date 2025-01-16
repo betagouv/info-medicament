@@ -1,6 +1,6 @@
 import React, { cache } from "react";
-import { notFound } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
+import { notFound } from "next/navigation";
 import { fr } from "@codegouvfr/react-dsfr";
 import Badge from "@codegouvfr/react-dsfr/Badge";
 import Tag from "@codegouvfr/react-dsfr/Tag";
@@ -17,15 +17,15 @@ import { isHtmlElement } from "./leafletUtils";
 import {
   displayCompleteComposants,
   displaySimpleComposants,
+  errorFallback,
   formatSpecName,
   getSpecialiteGroupName,
 } from "@/displayUtils";
 import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
-import { getAtc1, getAtc2, getAtcCode } from "@/data/grist/atc";
+import { ATCError, getAtc1, getAtc2, getAtcCode } from "@/data/grist/atc";
 import { getSpecialite } from "@/db/utils";
 import { PresentationsList } from "@/components/PresentationsList";
 import { pdbmMySQL } from "@/db/pdbmMySQL";
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
 
 export const dynamic = "error";
 export const dynamicParams = true;
@@ -189,8 +189,6 @@ export default async function Page(props: {
 }) {
   const { CIS } = await props.params;
 
-  if (!liste_CIS_MVP.includes(CIS)) notFound();
-
   const { specialite, composants, presentations, delivrance } =
     await getSpecialite(CIS);
 
@@ -198,9 +196,10 @@ export default async function Page(props: {
   if (!presentations.length) return notFound();
 
   const leaflet = await getLeaflet(CIS);
-  const atcCode = getAtcCode(CIS);
-  const atc1 = await getAtc1(atcCode);
-  const atc2 = await getAtc2(atcCode);
+  const atcCode = errorFallback(() => getAtcCode(CIS), ATCError, null);
+  const [atc1, atc2] = atcCode
+    ? [await getAtc1(atcCode), await getAtc2(atcCode)]
+    : [null, null];
   const isPrinceps =
     !!(await pdbmMySQL
       .selectFrom("Specialite")
@@ -218,8 +217,12 @@ export default async function Page(props: {
       <Breadcrumb
         segments={[
           { label: "Accueil", linkProps: { href: "/" } },
-          { label: atc1.label, linkProps: { href: `/atc/${atc1.code}` } },
-          { label: atc2.label, linkProps: { href: `/atc/${atc2.code}` } },
+          ...(atc1 && atc2
+            ? [
+                { label: atc1.label, linkProps: { href: `/atc/${atc1.code}` } },
+                { label: atc2.label, linkProps: { href: `/atc/${atc2.code}` } },
+              ]
+            : []),
           {
             label: displaySimpleComposants(composants)
               .map((s) => s.NomLib.trim())
@@ -248,15 +251,17 @@ export default async function Page(props: {
       <section className={"fr-mb-4w"}>
         <div className={"fr-mb-1w"}>
           <ul className={fr.cx("fr-tags-group", "fr-mb-n1v")}>
-            <Tag
-              small
-              linkProps={{
-                href: `/atc/${atc2.code}`,
-                className: cx("fr-tag--custom-alt-class"),
-              }}
-            >
-              {atc2.label}
-            </Tag>
+            {atc2 && (
+              <Tag
+                small
+                linkProps={{
+                  href: `/atc/${atc2.code}`,
+                  className: cx("fr-tag--custom-alt-class"),
+                }}
+              >
+                {atc2.label}
+              </Tag>
+            )}
             <Tag
               small
               linkProps={{

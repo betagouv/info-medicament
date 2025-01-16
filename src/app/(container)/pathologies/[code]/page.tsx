@@ -3,7 +3,6 @@ import DefinitionBanner from "@/components/DefinitionBanner";
 import { notFound } from "next/navigation";
 import { Patho, Specialite } from "@/db/pdbmMySQL/types";
 import { groupSpecialites } from "@/displayUtils";
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
 import { fr } from "@codegouvfr/react-dsfr";
 import { MedGroupSpecListList } from "@/components/MedGroupSpecList";
 import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
@@ -30,7 +29,6 @@ async function getPathoSpecialites(code: `${number}`): Promise<Specialite[]> {
     .selectAll("Specialite")
     .leftJoin("Spec_Patho", "Specialite.SpecId", "Spec_Patho.SpecId")
     .where("Spec_Patho.codePatho", "=", code)
-    .where("Specialite.SpecId", "in", liste_CIS_MVP)
     .execute();
 }
 

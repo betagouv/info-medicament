@@ -3,7 +3,6 @@ import { fr } from "@codegouvfr/react-dsfr";
 
 import { pdbmMySQL } from "@/db/pdbmMySQL";
 import { groupSpecialites } from "@/displayUtils";
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
 import { PdbmMySQL, Specialite, SubstanceNom } from "@/db/pdbmMySQL/types";
 import { notFound } from "next/navigation";
 import { MedGroupSpecListList } from "@/components/MedGroupSpecList";
@@ -68,7 +67,6 @@ async function getSubstance(ids: string[]) {
     .selectFrom("Specialite")
     .selectAll("Specialite")
     .where((eb) => withSubstances(eb.ref("Specialite.SpecId"), ids))
-    .where("Specialite.SpecId", "in", liste_CIS_MVP)
     .groupBy("Specialite.SpecId")
     .execute();
 

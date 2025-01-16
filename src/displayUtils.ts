@@ -156,3 +156,42 @@ export function dateShortFormat(date: Date): string {
     day: "2-digit",
   });
 }
+
+type NotPromise<T> = T extends Promise<infer U> ? U : T;
+
+export function errorFallback<R extends NotPromise<any>, F>(
+  getter: () => R,
+  errorClass: any,
+  fallback?: F,
+): R | F;
+export function errorFallback<R extends NotPromise<any>, F>(
+  getter: () => Promise<R>,
+  errorClass: any,
+  fallback?: F,
+): Promise<R | F>;
+export function errorFallback<R extends NotPromise<any>, F>(
+  getter: (() => R) | (() => Promise<R>),
+  errorClass: any,
+  fallback?: F,
+): Promise<R | F> | (R | F) {
+  let result: R | Promise<R>;
+  try {
+    result = getter();
+  } catch (e) {
+    if (e instanceof errorClass) {
+      return fallback as F;
+    }
+    throw e;
+  }
+
+  if (result instanceof Promise) {
+    return result.catch((e) => {
+      if (e instanceof errorClass) {
+        return fallback as F;
+      }
+      throw e;
+    });
+  }
+
+  return result;
+}

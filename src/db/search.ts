@@ -1,6 +1,5 @@
 import "server-only";
 import { pdbmMySQL } from "@/db/pdbmMySQL";
-import liste_CIS_MVP from "@/liste_CIS_MVP.json";
 import db, { SearchResult } from "@/db/index";
 import { sql } from "kysely";
 import { groupSpecialites } from "@/displayUtils";
@@ -33,7 +32,6 @@ const getSpecialites = unstable_cache(async function (
         )
         .leftJoin("Presentation", "Specialite.SpecId", "Presentation.SpecId")
         .where(presentationIsComm())
-        .where("Specialite.SpecId", "in", liste_CIS_MVP)
         .selectAll("Specialite")
         .select(({ fn }) => [
           fn<Array<string>>("json_arrayagg", ["NomId"]).as("SubsNomId"),
