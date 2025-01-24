@@ -1,6 +1,7 @@
 import "server-only";
 import { getGristTableData } from "@/data/grist/index";
 import slugify from "slugify";
+import { ImageProps } from "next/image";
 
 export async function getArticles() {
   const records = await getGristTableData("Articles", [
@@ -11,6 +12,7 @@ export async function getArticles() {
     "Lien",
     "Metadescription",
     "Homepage",
+    "Image",
   ]);
 
   return records.map(({ fields }) => {
@@ -23,6 +25,7 @@ export async function getArticles() {
       homepage: fields.Homepage as boolean,
       canonicalUrl: fields.Lien as string,
       description: fields.Metadescription as string,
+      image: fields.Image as Omit<ImageProps, "alt">,
     };
   });
 }

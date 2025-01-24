@@ -19,7 +19,7 @@ async function getDefinitions(firstLetter: string) {
     .filter((definition) =>
       (definition.fields.Nom_glossaire as string).startsWith(firstLetter),
     )
-    .map((definition) => definition.fields);
+    .map((definition) => definition.fields as { [key: string]: string });
 }
 
 async function getLetters() {

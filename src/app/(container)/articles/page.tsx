@@ -1,5 +1,6 @@
 import { getArticles } from "@/data/grist/articles";
 import { fr } from "@codegouvfr/react-dsfr";
+import { Fragment } from "react";
 import Link from "next/link";
 import Breadcrumb from "@codegouvfr/react-dsfr/Breadcrumb";
 
@@ -26,7 +27,7 @@ export default async function Page() {
         <div className={fr.cx("fr-col-md-8")}>
           <h1>Articles</h1>
           {categories.map((category) => (
-            <>
+            <Fragment key={category}>
               <h2 className={fr.cx("fr-h4", "fr-mb-1w")}>{category}</h2>
               <ul className={fr.cx("fr-raw-list", "fr-mb-5w")}>
                 {articles
@@ -49,7 +50,7 @@ export default async function Page() {
                     </li>
                   ))}
               </ul>
-            </>
+            </Fragment>
           ))}
         </div>
       </div>
