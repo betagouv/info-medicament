@@ -91,6 +91,12 @@ export default async function RootLayout({
                   <FooterPersonalDataPolicyItem key={"dp"} />,
                   <FooterConsentManagementItem key={"fc"} />,
                   headerFooterDisplayItem,
+                  {
+                    text: "Code source",
+                    linkProps: {
+                      href: `https://github.com/betagouv/infomedicament/${process.env.SOURCE_VERSION ? `commit/${process.env.SOURCE_VERSION}` : ""}`,
+                    },
+                  },
                 ]}
               />
               <GlossaryModals />
